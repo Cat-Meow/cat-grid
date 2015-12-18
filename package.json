@@ -1,0 +1,22 @@
+{
+  "name": "cat-grid",
+  "version": "1.1.0",
+  "description": "react, grid",
+  "main": "./dist/grid.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "yanweiqing",
+  "license": "MIT",
+  "dependencies": {
+    "cat-pagination": "^1.x",
+    "lodash": "^3.x",
+    "myui-core": "*"
+  },
+  "files": [
+    "src/",
+    "dist/",
+    "assets/",
+    "examples/"
+  ]
+}
