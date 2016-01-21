@@ -3,70 +3,56 @@ import Filter from './filter.js';
 import Buttons from './buttons.js';
 
 export default class NavHeader extends Component {
-    static propTypes = {
-        prefixName: React.PropTypes.string,
+  static propTypes = {
+    prefixName: React.PropTypes.string,
+    enableFilter: React.PropTypes.bool,
+    filterName: React.PropTypes.object,
+    updateFilter: React.PropTypes.func,
+    columns: React.PropTypes.array,
 
-        selected: React.PropTypes.array,
-        enableSelection: React.PropTypes.bool,
+    selected: React.PropTypes.array,
+    enableSelection: React.PropTypes.bool,
 
-        filter: React.PropTypes.bool,
-        filterName: React.PropTypes.object,
-        columns: React.PropTypes.array,
 
-        batch: React.PropTypes.array
-    }
-    static defaultProps = {
-        prefixName: 'cat',
-        enableSelection: false,
-        selected: [],
+    batch: React.PropTypes.array
+  }
 
-        filter: false,
-        filterName: {},
-        columns: [],
+  static defaultProps = {
+    prefixName: 'cat',
+    enableFilter: false,
+    filterName: {},
+    columns: [],
 
-        batch: []
-    }
+    enableSelection: false,
+    selected: [],
 
-    constructor(props) {
-        super(props); 
-    }
 
-    render() {
-        let { prefixName, enableSelection, filter, filterName, columns, updateFilter, batch, selected } = this.props,
-            self = this;
-        if (!filter && !enableSelection) {
-            return null;
+    batch: []
+  }
+
+  render() {
+    let { prefixName, enableFilter, filterName, updateFilter, columns, enableSelection, batch, selected } = this.props;
+
+    return (
+      <nav className={`${prefixName}-table-header clearfix`}>
+        {
+          enableFilter &&
+          <Filter
+            columns={columns}
+            prefixName={prefixName}
+            filterName={filterName}
+            updateFilter={updateFilter}
+          />
         }
-        return (
-            <nav className={`${prefixName}-table-header clearfix`}>
-                {
-                    (() => {
-                        if (filter) {
-                            return (
-                                <Filter
-                                    columns={columns}
-                                    prefixName={prefixName}
-                                    filterName={filterName}
-                                    updateFilter={updateFilter}
-                                />
-                            )
-                        }
-                    })()
-                }
-                {
-                    (() => {
-                        if (enableSelection) {
-                            return (
-                                <Buttons
-                                    prefixName={prefixName}
-                                    batch={batch}
-                                    selected={selected}
-                                />
-                            );
-                        }
-                    })()
-                }
-            </nav>        
-        )
-    }
+        {
+          enableSelection &&
+          <Buttons
+            prefixName={prefixName}
+            batch={batch}
+            selected={selected}
+          />
+        }
+      </nav>        
+    )
+  }
 }

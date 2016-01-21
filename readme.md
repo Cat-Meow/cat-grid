@@ -3,24 +3,18 @@
 ## 功能
 
 * 展示行列数据
-
 * 单元格数据格式化
-
 * 增、删、查、改
-
 * 分页
-
 * 全选
-
 * 排序
-
 * 额外信息展示
 
 
-如果不需要分页，就不传offset\limit\total
+## Tips
 
-在columns的初始化中，如果使用自定义的renderer，在函数中会返回给使用者当前空的值、行数据、空格所在位置信息，详见advance这个例子
-
+* If u do not need Pagination, just prevent 'offset\limit\total'
+* When using 'renderer', Grid will offer u current value in td, current line Data, info about this td
 
 
 ## API
