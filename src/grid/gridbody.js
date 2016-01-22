@@ -5,7 +5,7 @@ class GridBody extends Component {
   static propTypes = {
     dataList: React.PropTypes.array,
     columns: React.PropTypes.array,
-    rows: React.PropTypes.array,
+    rows: React.PropTypes.object,
     renderKey: React.PropTypes.string,
     selected: React.PropTypes.oneOfType([
         React.PropTypes.array,
@@ -35,6 +35,7 @@ class GridBody extends Component {
               <GridRow
                 key={`grid-tr-${key}`}
                 row={line}
+                rows={rows}
                 columns={columns}
                 info={{rowIndex: index, keyValue: key}}
                 enableSelection={selected ? true : false}

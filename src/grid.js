@@ -8,7 +8,7 @@ import NavFooter from './nav/navfooter.js';
 export default class Grid extends Component {
   static propTypes = {
     columns: React.PropTypes.array, // 单元格定义
-    rows: React.PropTypes.array, // 行特殊定义
+    rows: React.PropTypes.object, // 行特殊定义
     dataList: React.PropTypes.array,  // 数据
     pages: React.PropTypes.oneOfType([
         React.PropTypes.object,
