@@ -10,6 +10,19 @@ export default class Example extends Component {
     total: 0
   }
 
+  _configRow() {
+    return {
+      divStyle: (line, info) => {
+        return {
+          backgroundColor: line.active ? '#777777' : 'white'
+        }
+      },
+      className: (line, info) => {
+        return info.rowIndex % 2 === 0 ? 'ac' : 'bc';
+      }
+    }
+  }
+
   _configPrepare() {
     return [
       { label: '#', name: 'id',
@@ -84,6 +97,7 @@ export default class Example extends Component {
 
   render() {
     const headList = this._configPrepare();
+    const rows = this._configRow();
     let { dataList, offset, total} = this.state;
 
     return (
@@ -93,6 +107,7 @@ export default class Example extends Component {
         </button>
         <Grid
           columns={headList}
+          rows={rows}
           dataList={dataList}
           pages={{offset, total, limit: 20}}
           rerender={this::this._changeData}

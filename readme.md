@@ -36,4 +36,8 @@ TableStyle | 表格风格 | array | ['bordered'] | bordered\triped\condensed
 myHeadStyle | 表格头风格 | string | active | active\success\info\warning\danger
 batch | 自定义绑定多选功能的按钮 | array | [] |
 
+* 每一行都可以单独设定divStyle、className, className可以直接传递字符串
+* 每一单元格可以单独设定divStyle、className、orderBy、renderer
 
+* 行的回调参数是line info
+* 单元格的回调参数分别是value line info
