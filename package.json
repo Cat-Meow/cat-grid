@@ -23,7 +23,7 @@
     "react": "^0.14.x"
   },
   "devDependencies": {
-    "regether-rc-server": "*",
+    "regether-rc-server": "^0.1.1",
     "react-dom": "^0.14.x"
   }
 }

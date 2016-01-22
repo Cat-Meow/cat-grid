@@ -6,7 +6,10 @@ export default class NavFooter extends Component {
     prefixName: React.PropTypes.string,
     update: React.PropTypes.func,
     number: React.PropTypes.number,
-    pages: React.PropTypes.object
+    pages: React.PropTypes.oneOfType([
+        React.PropTypes.object,
+        React.PropTypes.bool
+    ])
   }
 
   static defaultProps = {

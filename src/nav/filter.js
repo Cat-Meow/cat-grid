@@ -11,7 +11,7 @@ export default class Filter extends Component {
   static defaultProps = {
     prefixName: 'cat',
     filterName: {
-      name: '',
+      label: '',
       value: ''
     },
     columns: []
@@ -33,7 +33,7 @@ export default class Filter extends Component {
 
   _handleFilterChoose(event) {
     event.preventDefault();
-    this.props.updateFilter(event.target.name, 'name');
+    this.props.updateFilter(event.target.name, 'label');
     this._handleFilterClick();
   }
 
@@ -42,15 +42,13 @@ export default class Filter extends Component {
     let { open } = this.state;
     let self = this;
 
-    // 如果将filterName.name设置为label，可以减少这次查询
     let index = -1;
     for (let i = columns.length - 1; i >= 0; i --) {
-      if (columns[i].name && columns[i].name === filterName.name) {
+      if (columns[i].label === filterName.label) {
         index = i;
-        break;
       }
     }
-    let dropButtonLabel = (index < 0) ? '全部' : columns[index].label;
+    let dropButtonLabel = index < 0 ? '全部' : columns[index].label;
 
     return (
       <div className={`${prefixName}-table-headernote pull-left`}>
@@ -65,24 +63,26 @@ export default class Filter extends Component {
           </button>
 
           <ul className="dropdown-menu" style={{display: open ? 'block' : 'none'}}>
-            <li className={filterName.name === '' ? 'active' : ''}>
-              <a href="#" name="" onClick={this::this._handleFilterChoose}>
+            <li className={filterName.label === '' ? 'active' : ''}>
+              <a href="#" label="" onClick={this::this._handleFilterChoose}>
                 全部
               </a>
             </li>
             <li role="separator" className="divider"/>
             {
-              columns.map((item) => {
-                if (item.name) {
+              columns
+                .filter((item) => {
+                  return !!item.name;
+                })
+                .map((item) => {
                   return (
-                    <li key={item.name} className={filterName.name === item.name ? 'active' : ''}>
-                      <a href="#" name={item.name} onClick={self::self._handleFilterChoose}>
+                    <li key={item.label} className={filterName.label === item.label ? 'active' : ''}>
+                      <a href="#" name={item.label} onClick={self::self._handleFilterChoose}>
                         {item.label}
                       </a>
                     </li>
                   );
-                }
-              })
+                })
             }
           </ul>
         </div>

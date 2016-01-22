@@ -50,7 +50,7 @@ export default class Grid extends Component {
       selectAll: false,
       selected: [],
       filterName: {
-        name: '',
+        label: '',
         value: ''
       },
       data: props.dataList.slice(),
@@ -109,7 +109,6 @@ export default class Grid extends Component {
   _updateFilter(filter, key) {
     let { dataList, columns } = this.props;
     let { filterName } = this.state;
-
     filterName[key] = filter;
     let data = this._filterData(filterName, dataList, columns);
 
@@ -128,26 +127,36 @@ export default class Grid extends Component {
     }
 
     let self = this;
-    return data.filter((line) => {
-      if (filterName.name === '') {
+    if (filterName.label === '') {
+      // 针对所有数据进行过滤
+      return data.filter((line) => {
         return thead.some((column) => {
-          if (!column.name) {
-            return false;
-          }
+          // 对每一行数据的每一列进行过滤
           return self._checkTd(filterName.value, line[column.name], column.renderer);
         });
-      } else {
-        let renderer = _.pluck(_.filter( thead, {name: filterName.name}), 'renderer')[0];
-        return self._checkTd(filterName.value, line[filterName.name], renderer);
-      }
-      return true
-    });
+      });
+    } else {
+      // 针对某一列数据进行过滤
+      return data.filter((line) => {
+        let renderer, name;
+        for (let i = thead.length - 1; i >= 0; i --) {
+          if (filterName.label === thead[i].label) {
+            name = thead[i].name;
+            renderer = thead[i].renderer;
+            break;
+          }
+        }
+        return self._checkTd(filterName.value, line[name], renderer);
+      });
+    }
   }
 
   // 判断单元格的筛选
   _checkTd = (value, tdValue, renderer) => {
-    tdValue = renderer !== undefined ? renderer(tdValue) : tdValue;
-    if (tdValue.toString().indexOf(value) < 0) {
+    tdValue = renderer ? renderer(tdValue) : tdValue;
+    // 此处默认以字符串格式对内容进行对比
+    // TODO: 此处需要更优解
+    if (tdValue === undefined || tdValue.toString().indexOf(value) < 0) {
       return false;
     }
     return true;
