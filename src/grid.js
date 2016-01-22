@@ -54,11 +54,7 @@ export default class Grid extends Component {
         value: ''
       },
       data: props.dataList.slice(),
-      orderFunc: {
-        key: '',
-        func: ()=>{},
-        forward: true
-      }
+      orderFunc: false
     }
   }
 
@@ -163,11 +159,11 @@ export default class Grid extends Component {
   }
 
 
-    _updateOrder = (orderFunc) => {
-        this.setState({
-            orderFunc: orderFunc
-        });
-    }
+  _updateOrder = (orderFunc) => {
+    this.setState({
+      orderFunc: orderFunc
+    });
+  }
 
   render() {
     let { columns, rows, dataList, pages, hasFooter, renderKey, selection, enableFilter, myTableStyle, myHeadStyle, className, divStyle, prefixName } = this.props;
@@ -178,11 +174,14 @@ export default class Grid extends Component {
         myTableStyle.map((item) => `${prefixName}-table-${item}`),
         className
       );
-    let orderedData = data.slice();
 
-    if (orderFunc.key !== '') {
-      orderedData.sort( (prev, next) => {
+    let orderedData = data.slice();
+    if (orderFunc) {
+      // 使用某一列进行排序的情况下调用
+      orderedData.sort((prev, next) => {
+        // 调用外部定义的func
         let order = orderFunc.func(prev[orderFunc.key], next[orderFunc.key]);
+        // 可以设定正向和反向排序
         return orderFunc.forward ? order : !order;
       });
     }
@@ -207,12 +206,12 @@ export default class Grid extends Component {
           <GridHead
             columns={columns}
             myStyle={this.props.myHeadStyle}
+            orderFunc={orderFunc}
+            updateOrder={this._updateOrder}
 
             enableSelection={selection}
             selectAll={selectAll}
             onSelect={this._handleSelect}
-            orderFunc={orderFunc}
-            updateOrder={this._updateOrder}
           />
           <GridBody
             dataList={orderedData}
@@ -223,7 +222,6 @@ export default class Grid extends Component {
             enableSelection={selection}
             selected={selected}
             onSelect={this._handleSelect}
-
           />
         </table>
         { (pages || hasFooter) &&
