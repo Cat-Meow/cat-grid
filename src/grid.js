@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { setClass } from 'cat-util';
 import _ from 'lodash';
 import GridHead from './grid/gridhead.js';
 import GridBody from './grid/gridbody.js';
@@ -6,85 +7,63 @@ import NavHeader from './nav/navheader.js';
 import NavFooter from './nav/navfooter.js';
 
 export default class Grid extends Component {
-    static propTypes = {
-        columns: React.PropTypes.array,
-        rows: React.PropTypes.array,
-        offset: React.PropTypes.number,
-        total: React.PropTypes.number,
-        limit: React.PropTypes.number,
-        renderKey: React.PropTypes.string,
-        query: React.PropTypes.object,
+  static propTypes = {
+    columns: React.PropTypes.array, // 单元格定义
+    rows: React.PropTypes.array, // 行特殊定义
+    dataList: React.PropTypes.array,  // 数据
+    pages: React.PropTypes.oneOfType([
+        React.PropTypes.object,
+        React.PropTypes.bool
+    ]),  // 分页相关设定
+    hasFooter: React.PropTypes.bool,
+    renderKey: React.PropTypes.string,  // grid数据默认采用的key
+    selection: React.PropTypes.oneOfType([
+      React.PropTypes.array,
+      React.PropTypes.bool,
+    ]), // 全选相关功能
+    enableFilter: React.PropTypes.bool, // 数据过滤相关功能
+    myTableStyle: React.PropTypes.array,  // 内置风格
+    myHeadStyle: React.PropTypes.string,  // 内置头部风格
+    className: React.PropTypes.string,  // 自定义类名
+    divStyle: React.PropTypes.object, // 彻底自定义样式
+    prefixName: React.PropTypes.string // 前缀
+  }
 
-        enableSelection: React.PropTypes.bool,
-        filter: React.PropTypes.bool,
-        className: React.PropTypes.string,
-        heightControl: React.PropTypes.string,
-        prefixName: React.PropTypes.string,
-        TableStyle: React.PropTypes.array,
-        myHeadStyle: React.PropTypes.string,
-        batch: React.PropTypes.array
+  static defaultProps = {
+    columns: [],
+    rows: [],
+    dataList: [],
+    pages: false,
+    hasFooter: true,
+    renderKey: 'id',
+    selection: false,
+    enableFilter: false,
+    myTableStyle: ['bordered'],   // triped, condensed
+    myHeadStyle: 'active',    // active, success, info, warning, danger
+    className: 'table-responsive',
+    divStyle: {},
+    prefixName: 'cat'
+  }
+
+  _createState(props) {
+    return {
+      selectAll: false,
+      selected: [],
+      filterName: {
+        label: '',
+        value: ''
+      },
+      data: props.dataList.slice(),
+      orderFunc: false
     }
+  }
 
-    static defaultProps = {
-        columns: [],
-        rows: [],   // 列表生成器
-        offset: -1,
-        total: 0,
-        limit: 1,
-        renderKey: 'id',
-        query: {},
+  state = this._createState(this.props)
 
-        enableSelection: false,     // 满足全选
-        className: 'table-responsive',      // 容器的类名
-        heightControl: '',
-        prefixName: 'cat',  // 前缀
-        TableStyle: ['bordered'],   // triped, condensed
-        myHeadStyle: 'active',    // active, success, info, warning, danger
-        batch: []
-    }
-
-    state = {
-        selectAll: false,
-        selected: [],
-        filterName: {
-            name: '',
-            value: ''
-        },
-        data: [],
-        orderFunc: {
-            key: '',
-            func: ()=>{},
-            forward: true
-        }
-    }
-
-    constructor(props) {
-        super(props);
-    }
-
-    componentWillMount() {
-        this.setState({
-            data: this.props.rows
-        });
-    }
-
-    // 接收新数据
-    componentWillReceiveProps(nextProps) {
-        this.setState({
-            selectAll: false,
-            selected: [],
-            filterName: {
-                name: '',
-                value: ''
-            },
-            data: nextProps.rows,
-            orderFunc: {
-                key: '',
-                func: ()=>{},
-                forward: true
-            }
-        });
-    }
+  // 接收新数据
+  componentWillReceiveProps(nextProps) {
+    this.setState(this._createState(nextProps));
+  }
 
     // 选中处理
     _handleSelect = (value) => {
@@ -116,136 +95,144 @@ export default class Grid extends Component {
         });
     }
 
-    // 分页处理
-    // 对外输出offset
-    _updatePage = (offset) => {
-        let { query, limit } = this.props;
-        this.props.rerender(offset * limit, query);
+  // 分页处理
+  // 对外输出offset
+  _updatePage(offset) {
+    this.props.rerender(offset * this.props.pages.limit);
+  }
+
+  // 筛选处理
+  _updateFilter(filter, key) {
+    let { dataList, columns } = this.props;
+    let { filterName } = this.state;
+    filterName[key] = filter;
+    let data = this._filterData(filterName, dataList, columns);
+
+    this.setState({
+      selectAll: false,
+      selected: [],
+      filterName: filterName,
+      data: data
+    });
+  }
+
+  // 过滤数据
+  _filterData = (filterName, data, thead) => {
+    if (filterName.value === '') {
+      return data.slice();
     }
 
-    // 筛选处理
-    _updateFilter = (filter, key) => {
-        let { filterName } = this.state,
-            { rows, columns } = this.props,
-            data = [];
-        filterName[key] = filter;
-        data = this._filterData(filterName, rows, columns);
-
-        this.setState({
-            selectAll: false,
-            selected: [],
-            filterName: filterName,
-            data: data
+    let self = this;
+    if (filterName.label === '') {
+      // 针对所有数据进行过滤
+      return data.filter((line) => {
+        return thead.some((column) => {
+          // 对每一行数据的每一列进行过滤
+          return self._checkTd(filterName.value, line[column.name], column.renderer);
         });
-    }
-
-    // 筛选规则
-    _filterData = (filterName, rows, thead) => {
-        let self = this;
-        if (filterName.value === '') {
-            return rows;
+      });
+    } else {
+      // 针对某一列数据进行过滤
+      return data.filter((line) => {
+        let renderer, name;
+        for (let i = thead.length - 1; i >= 0; i --) {
+          if (filterName.label === thead[i].label) {
+            name = thead[i].name;
+            renderer = thead[i].renderer;
+            break;
+          }
         }
-        return _.filter(rows, function(row) {
-            if (filterName.name === '') {
-                return _.some(thead, function(column) {
-                    if (!column.name) {
-                        return false;
-                    }
-                    return self._checkTd(filterName.value, row[column.name], column.renderer);
-                });
-            } else {
-                let renderer = _.pluck(_.filter( thead, {name: filterName.name}), 'renderer')[0];
-                return self._checkTd(filterName.value, row[filterName.name], renderer);
-            }
-            return true
-        });
+        return self._checkTd(filterName.value, line[name], renderer);
+      });
     }
-    // 判断单元格的筛选
-    _checkTd = (value, tdValue, renderer) => {
-        tdValue = renderer !== undefined ? renderer(tdValue) : tdValue;
-        if (tdValue.toString().indexOf(value) < 0) {
-            return false;
+  }
+
+  // 判断单元格的筛选
+  _checkTd = (value, tdValue, renderer) => {
+    tdValue = renderer ? renderer(tdValue) : tdValue;
+    // 此处默认以字符串格式对内容进行对比
+    // TODO: 此处需要更优解
+    if (tdValue === undefined || tdValue.toString().indexOf(value) < 0) {
+      return false;
+    }
+    return true;
+  }
+
+
+  _updateOrder = (orderFunc) => {
+    this.setState({
+      orderFunc: orderFunc
+    });
+  }
+
+  render() {
+    let { columns, rows, dataList, pages, hasFooter, renderKey, selection, enableFilter, myTableStyle, myHeadStyle, className, divStyle, prefixName } = this.props;
+    let { filterName, data, selectAll, selected, orderFunc } = this.state;
+    let tableClassName = setClass(
+        `${prefixName}-table`,
+        `${prefixName}-table-hover`,
+        myTableStyle.map((item) => `${prefixName}-table-${item}`),
+        className
+      );
+
+    let orderedData = data.slice();
+    if (orderFunc) {
+      // 使用某一列进行排序的情况下调用
+      orderedData.sort((prev, next) => {
+        // 调用外部定义的func
+        let order = orderFunc.func(prev[orderFunc.key], next[orderFunc.key]);
+        // 可以设定正向和反向排序
+        return orderFunc.forward ? order : !order;
+      });
+    }
+
+    return (
+      <div style={divStyle}>
+        {
+          (enableFilter || selection) &&
+          <NavHeader
+            prefixName={prefixName}
+            enableFilter={enableFilter}
+            filterName={filterName}
+            updateFilter={this::this._updateFilter}
+            columns={columns}
+
+            selected={selected}
+            enableSelection={selection}
+
+          />
         }
-        return true;
-    }
+        <table className={tableClassName}>
+          <GridHead
+            columns={columns}
+            myStyle={this.props.myHeadStyle}
+            orderFunc={orderFunc}
+            updateOrder={this._updateOrder}
 
-    _updateOrder = (orderFunc) => {
-        this.setState({
-            orderFunc: orderFunc
-        });
-    }
+            enableSelection={selection}
+            selectAll={selectAll}
+            onSelect={this._handleSelect}
+          />
+          <GridBody
+            dataList={orderedData}
+            columns={columns}
+            rows={rows}
+            renderKey={renderKey}
 
-    render() {
-        let { columns, prefixName, className, rows, offset, total, enableSelection, filter, heightControl, limit, renderKey, batch, TableStyle } = this.props,
-            { selectAll, selected, filterName, data, orderFunc } = this.state,
-            divStyle = heightControl !== '' ? {
-                maxHeight: `${heightControl}px`
-            } : {},
-            tableClasses = ((style) => {
-                let l = '';
-                _.each(style, function(item) {
-                    l += ` ${prefixName}-table-${item}`;
-                });
-                return l;
-            })(TableStyle),
-            tableClassName = `${prefixName}-table ${prefixName}-table-hover ${tableClasses}`;
-
-        let orderedData = data.slice();
-        if (orderFunc.key !== '') {
-            orderedData.sort( (prev, next) => {
-                let order = orderFunc.func(prev[orderFunc.key], next[orderFunc.key]);
-                return orderFunc.forward ? order : !order;
-            });
+            enableSelection={selection}
+            selected={selected}
+            onSelect={this._handleSelect}
+          />
+        </table>
+        { (pages || hasFooter) &&
+          <NavFooter
+            prefixName={prefixName}
+            update={this::this._updatePage}
+            number={dataList.length}
+            pages={pages}
+          />
         }
-
-        return (
-            <div>
-                <NavHeader
-                    prefixName={prefixName}
-                    selected={selected}
-                    columns={columns}
-                    enableSelection={enableSelection}
-                    filter={filter}
-                    filterName={filterName}
-                    updateFilter={this._updateFilter}
-                    batch={batch}
-                />
-                <div
-                    className={`${prefixName}-${className}`}
-                    style={divStyle}
-                >
-                    <table className={tableClassName}>
-                        <GridHead
-                            columns={columns}
-                            enableSelection={enableSelection}
-                            selectAll={selectAll}
-                            myStyle={this.props.myHeadStyle}
-                            onSelect={this._handleSelect}
-                            orderFunc={orderFunc}
-                            updateOrder={this._updateOrder}
-                        />
-                        <GridBody
-                            rows={orderedData}
-                            columns={columns}
-                            enableSelection={enableSelection}
-                            renderKey={renderKey}
-                            selected={selected}
-                            onSelect={this._handleSelect}
-                            filter={filter}
-                            filterName={filterName}
-                        />
-                    </table>
-                </div>
-
-                <NavFooter
-                    prefixName={prefixName}
-                    offset={offset}
-                    update={this._updatePage}
-                    limit={limit}
-                    number={rows.length}
-                    total={total}
-                />
-            </div>
-        );
-    }
+      </div>
+    );
+  }
 };

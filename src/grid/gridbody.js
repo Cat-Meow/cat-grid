@@ -3,49 +3,52 @@ import _ from 'lodash';
 import GridRow from './gridrow.js';
 
 class GridBody extends Component {
-    static propTypes = {
-        columns: React.PropTypes.array,
-        enableSelection: React.PropTypes.bool,
-        selectAll: React.PropTypes.bool,
-        renderKey: React.PropTypes.string
-    }
+  static propTypes = {
+    dataList: React.PropTypes.array,
+    columns: React.PropTypes.array,
+    rows: React.PropTypes.array,
+    renderKey: React.PropTypes.string,
 
-    static defaultProps = {
-        columns: [],
-        enableSelection: false,
-        selectAll: false,
-        renderKey: 'id',
-    }
+    enableSelection: React.PropTypes.bool,
+    selectAll: React.PropTypes.bool,
+    onSelect: React.PropTypes.func
+  }
 
-    constructor(props) {
-        super(props);
-    }
+  static defaultProps = {
+    dataList: [],
+    columns: [],
+    rows: [],
+    renderKey: 'id',
+    enableSelection: false,
+    selectAll: false,
+  }
 
-    render () {
-        let self = this;
-        let { rows, columns, enableSelection, renderKey, selected } = this.props;
+  render () {
+    let { rows, columns, renderKey, dataList, enableSelection, selected, onSelect } = this.props;
 
-        return (
-            <tbody>
-                {rows.map(function(row, index) {
-                    let key = row[renderKey] !== undefined ? row[renderKey] : index,
-                        ifSelected = _.indexOf(selected, key) > -1;
+    return (
+      <tbody>
+      {
+        dataList.map(function(line, index) {
+          let key = line[renderKey] !== undefined ? line[renderKey] : index;
+          let ifSelected = _.indexOf(selected, key) > -1;
 
-                    return (
-                        <GridRow
-                            key={`grid-tr-${key}`}
-                            row={row}
-                            columns={columns}
-                            info={{rowIndex: index, keyValue: key}}
-                            enableSelection={enableSelection}
-                            ifSelected={ifSelected}
-                            onSelect={self.props.onSelect}
-                        />
-                    );
-                })}
-            </tbody>
-        );
-    }
+          return (
+            <GridRow
+              key={`grid-tr-${key}`}
+              row={line}
+              columns={columns}
+              info={{rowIndex: index, keyValue: key}}
+              enableSelection={enableSelection}
+              ifSelected={ifSelected}
+              onSelect={onSelect}
+            />
+          );
+        })
+      }
+      </tbody>
+    );
+  }
 };
 
 export default GridBody;
