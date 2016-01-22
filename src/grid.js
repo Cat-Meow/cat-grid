@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { setClass } from 'cat-util';
-import _ from 'lodash';
 import GridHead from './grid/gridhead.js';
 import GridBody from './grid/gridbody.js';
 import NavHeader from './nav/navheader.js';
@@ -48,8 +47,8 @@ export default class Grid extends Component {
   _createState(props) {
     return {
       selectAll: false,
-      selected: [],
-      filterName: {
+      selected: props.selection ? [] : false,
+      filter: {
         label: '',
         value: ''
       },
@@ -65,35 +64,33 @@ export default class Grid extends Component {
     this.setState(this._createState(nextProps));
   }
 
-    // 选中处理
-    _handleSelect = (value) => {
-        let { selectAll, selected, data } = this.state,
-            { renderKey } = this.props;
-        if (value === '-1') {
-            selectAll = !selectAll;
-            if (selectAll) {
-                selected = _.map(data, renderKey);
-            } else {
-                selected = [];
-            }
-        } else {
-            let index = _.indexOf(selected, value);
-            if (index < 0) {
-                selected.push(value);
-            } else {
-                selected.splice(index, 1);
-            }
-            if (selected.length === data.length && selected.length !== 0) {
-                selectAll = true;
-            } else {
-                selectAll = false;
-            }
-        }
-        this.setState({
-            selectAll: selectAll,
-            selected: selected
+  // 选中处理
+  _handleSelect(value) {
+    let { selectAll, selected, data } = this.state;
+    let { renderKey } = this.props;
+    if (value === '-1') {
+      selectAll = !selectAll;
+      if (selectAll) {
+        selected = data.map((item, index) => {
+          return item[renderKey] !== undefined ? item[renderKey] : index;
         });
+      } else {
+        selected = [];
+      }
+    } else {
+      let index = selected.indexOf(value);
+      if (index < 0) {
+        selected.push(value);
+      } else {
+        selected.splice(index, 1);
+      }
+      selecteAll = selected.length === data.length && selected.length !== 0;
     }
+    this.setState({
+      selectAll: selectAll,
+      selected: selected
+    });
+  }
 
   // 分页处理
   // 对外输出offset
@@ -102,33 +99,33 @@ export default class Grid extends Component {
   }
 
   // 筛选处理
-  _updateFilter(filter, key) {
+  _updateFilter(value, key) {
     let { dataList, columns } = this.props;
-    let { filterName } = this.state;
-    filterName[key] = filter;
-    let data = this._filterData(filterName, dataList, columns);
+    let { filter } = this.state;
+    filter[key] = value;
+    let data = this._filterData(filter, dataList, columns);
 
     this.setState({
       selectAll: false,
       selected: [],
-      filterName: filterName,
+      filter: filter,
       data: data
     });
   }
 
   // 过滤数据
-  _filterData = (filterName, data, thead) => {
-    if (filterName.value === '') {
+  _filterData(filter, data, thead) {
+    if (filter.value === '') {
       return data.slice();
     }
 
     let self = this;
-    if (filterName.label === '') {
+    if (filter.label === '') {
       // 针对所有数据进行过滤
       return data.filter((line) => {
         return thead.some((column) => {
           // 对每一行数据的每一列进行过滤
-          return self._checkTd(filterName.value, line[column.name], column.renderer);
+          return self._checkTd(filter.value, line[column.name], column.renderer);
         });
       });
     } else {
@@ -136,19 +133,19 @@ export default class Grid extends Component {
       return data.filter((line) => {
         let renderer, name;
         for (let i = thead.length - 1; i >= 0; i --) {
-          if (filterName.label === thead[i].label) {
+          if (filter.label === thead[i].label) {
             name = thead[i].name;
             renderer = thead[i].renderer;
             break;
           }
         }
-        return self._checkTd(filterName.value, line[name], renderer);
+        return self._checkTd(filter.value, line[name], renderer);
       });
     }
   }
 
   // 判断单元格的筛选
-  _checkTd = (value, tdValue, renderer) => {
+  _checkTd(value, tdValue, renderer) {
     tdValue = renderer ? renderer(tdValue) : tdValue;
     // 此处默认以字符串格式对内容进行对比
     // TODO: 此处需要更优解
@@ -158,8 +155,8 @@ export default class Grid extends Component {
     return true;
   }
 
-
-  _updateOrder = (orderFunc) => {
+  // 排序相关内容更新
+  _updateOrder(orderFunc) {
     this.setState({
       orderFunc: orderFunc
     });
@@ -167,7 +164,7 @@ export default class Grid extends Component {
 
   render() {
     let { columns, rows, dataList, pages, hasFooter, renderKey, selection, enableFilter, myTableStyle, myHeadStyle, className, divStyle, prefixName } = this.props;
-    let { filterName, data, selectAll, selected, orderFunc } = this.state;
+    let { filter, data, selectAll, selected, orderFunc } = this.state;
     let tableClassName = setClass(
         `${prefixName}-table`,
         `${prefixName}-table-hover`,
@@ -193,35 +190,30 @@ export default class Grid extends Component {
           <NavHeader
             prefixName={prefixName}
             enableFilter={enableFilter}
-            filterName={filterName}
+            filter={filter}
             updateFilter={this::this._updateFilter}
             columns={columns}
-
             selected={selected}
-            enableSelection={selection}
-
+            batch={selection}
           />
         }
         <table className={tableClassName}>
           <GridHead
             columns={columns}
-            myStyle={this.props.myHeadStyle}
+            myStyle={myHeadStyle}
             orderFunc={orderFunc}
-            updateOrder={this._updateOrder}
-
-            enableSelection={selection}
+            updateOrder={this::this._updateOrder}
+            selected={selected}
             selectAll={selectAll}
-            onSelect={this._handleSelect}
+            onSelect={this::this._handleSelect}
           />
           <GridBody
             dataList={orderedData}
             columns={columns}
             rows={rows}
             renderKey={renderKey}
-
-            enableSelection={selection}
             selected={selected}
-            onSelect={this._handleSelect}
+            onSelect={this::this._handleSelect}
           />
         </table>
         { (pages || hasFooter) &&

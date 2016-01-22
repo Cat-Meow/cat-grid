@@ -6,32 +6,30 @@ export default class NavHeader extends Component {
   static propTypes = {
     prefixName: React.PropTypes.string,
     enableFilter: React.PropTypes.bool,
-    filterName: React.PropTypes.object,
+    filter: React.PropTypes.object,
     updateFilter: React.PropTypes.func,
     columns: React.PropTypes.array,
-
-    selected: React.PropTypes.array,
-    enableSelection: React.PropTypes.bool,
-
-
-    batch: React.PropTypes.array
+    selected: React.PropTypes.oneOfType([
+        React.PropTypes.array,
+        React.PropTypes.bool
+    ]),
+    batch: React.PropTypes.oneOfType([
+        React.PropTypes.array,
+        React.PropTypes.bool
+    ])
   }
 
   static defaultProps = {
     prefixName: 'cat',
     enableFilter: false,
-    filterName: {},
+    filter: {},
     columns: [],
-
-    enableSelection: false,
-    selected: [],
-
-
-    batch: []
+    selected: false,
+    batch: false
   }
 
   render() {
-    let { prefixName, enableFilter, filterName, updateFilter, columns, enableSelection, batch, selected } = this.props;
+    let { prefixName, enableFilter, filter, updateFilter, columns, selected, batch } = this.props;
 
     return (
       <nav className={`${prefixName}-table-header clearfix`}>
@@ -40,16 +38,16 @@ export default class NavHeader extends Component {
           <Filter
             columns={columns}
             prefixName={prefixName}
-            filterName={filterName}
+            filter={filter}
             updateFilter={updateFilter}
           />
         }
         {
-          enableSelection &&
+          batch &&
           <Buttons
             prefixName={prefixName}
-            batch={batch}
             selected={selected}
+            batch={batch}
           />
         }
       </nav>        

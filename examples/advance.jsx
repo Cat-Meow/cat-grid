@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import Grid from '../src/grid.js';
+import _ from 'lodash';
 import '../assets/with-pagination.less';
 
 export default class Example extends Component {
@@ -97,6 +98,14 @@ export default class Example extends Component {
           rerender={this::this._changeData}
           renderKey="id"
           enableFilter={true}
+          selection={[
+            {
+              name: '测试',
+              onClick: (value) => {
+                console.log(value);
+              }
+            }
+          ]}
         />
       </div>
     );

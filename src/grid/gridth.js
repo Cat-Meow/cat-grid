@@ -35,12 +35,10 @@ class GridTh extends Component {
 
 
     return (
-    <th>
-      { column.label }
-      {
-        column.orderBy && <i className={`glyphicon glyphicon-${classes}`} onClick={this::this._handleClick} />
-      }
-    </th>
+      <th>
+        { column.label }
+        { column.orderBy && <i className={`glyphicon glyphicon-${classes}`} onClick={this::this._handleClick} /> }
+      </th>
     );
   }
 }
