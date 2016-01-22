@@ -5,7 +5,10 @@ class GridHead extends Component {
   static propTypes = {
     columns: React.PropTypes.array,
     myStyle: React.PropTypes.string,
-    enableSelection: React.PropTypes.bool,
+    selected: React.PropTypes.oneOfType([
+        React.PropTypes.bool,
+        React.PropTypes.array
+    ]),
     selectAll: React.PropTypes.bool,
     orderFunc: React.PropTypes.oneOfType([
       React.PropTypes.object,
@@ -16,15 +19,15 @@ class GridHead extends Component {
   static defaultProps = {
     columns: [],
     myStyle: 'active',
-    enableSelection: false,
+    selected: false,
     selectAll: false,
     orderFunc: false
   }
 
 
-    _handleClick = (event) => {
-        this.props.onSelect('-1');
-    }
+  _handleClick(event) {
+    this.props.onSelect('-1');
+  }
 
   _handleOrder(newKey, func) {
     let { orderFunc } = this.props;
@@ -42,28 +45,19 @@ class GridHead extends Component {
     this.props.updateOrder(orderFunc);
   }
 
-    renderSelection() {
-        let { enableSelection, selectAll } = this.props,
-            iconClass = selectAll ? 'glyphicon glyphicon-check' : 'glyphicon glyphicon-unchecked';
-        if (!enableSelection) {
-            return null;
-        } else {
-            return (
-                <th onClick={this._handleClick} className="table-th-hover">
-                    <i className={iconClass} />
-                </th>        
-            );
-        }
-    }
-
   render() {
-    let { columns, orderFunc, myStyle } = this.props,
-        self = this;
+    let { columns, orderFunc, myStyle, selected, selectAll } = this.props;
+    let self = this;
 
     return (
       <thead>
         <tr className={myStyle}>
-        { this.renderSelection() }
+        {
+          selected &&
+          <th onClick={this::this._handleClick} className="table-th-hover">
+            <i className={selectAll ? 'glyphicon glyphicon-check' : 'glyphicon glyphicon-unchecked'} />
+          </th> 
+        }
         {
           columns.map((column) => {
             return (

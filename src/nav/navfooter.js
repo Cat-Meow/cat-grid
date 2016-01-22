@@ -7,8 +7,8 @@ export default class NavFooter extends Component {
     update: React.PropTypes.func,
     number: React.PropTypes.number,
     pages: React.PropTypes.oneOfType([
-        React.PropTypes.object,
-        React.PropTypes.bool
+      React.PropTypes.object,
+      React.PropTypes.bool
     ])
   }
 
@@ -34,7 +34,7 @@ export default class NavFooter extends Component {
         <div className={`${prefixName}-table-footnote pull-left`}>
           {
             (total !== undefined || number !== 0) &&
-            <span> 共{total !== undefined ? total : number }条数据  </span>
+            <span>{total !== undefined ? `共${total}` : `本页共${number}` }条数据  </span>
           }
           {
             number !== 0 && offset !== undefined &&
