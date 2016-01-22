@@ -23,6 +23,7 @@ class GridTd extends Component {
 
     if (column.renderer) {
       content = column.renderer(row[column.name], row, info);
+      // renderer处理的数据是源数据
     }
 
     return (
