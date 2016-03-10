@@ -20,7 +20,7 @@ export default class NavHeader extends Component {
   }
 
   static defaultProps = {
-    prefixName: 'cat',
+    prefixName: 'rs',
     enableFilter: false,
     filter: {},
     columns: [],

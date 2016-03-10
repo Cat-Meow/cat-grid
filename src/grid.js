@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { setClass } from 'cat-util';
+import { setClass } from 'rs-util';
 import GridHead from './grid/gridhead.js';
 import GridBody from './grid/gridbody.js';
 import NavHeader from './nav/navheader.js';
@@ -30,7 +30,7 @@ export default class Grid extends Component {
 
   static defaultProps = {
     columns: [],
-    rows: [],
+    rows: {},
     dataList: [],
     pages: false,
     hasFooter: true,
@@ -41,7 +41,7 @@ export default class Grid extends Component {
     myHeadStyle: 'active',    // active, success, info, warning, danger
     className: 'table-responsive',
     divStyle: {},
-    prefixName: 'cat'
+    prefixName: 'rs'
   }
 
   _createState(props) {

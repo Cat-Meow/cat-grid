@@ -9,7 +9,7 @@ export default class Filter extends Component {
   }
 
   static defaultProps = {
-    prefixName: 'cat',
+    prefixName: 'rs',
     filter: {
       label: '',
       value: ''

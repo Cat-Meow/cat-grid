@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import Pagination from 'cat-pagination';
+import Pagination from 'rs-pagination';
 
 export default class NavFooter extends Component {
   static propTypes = {
@@ -13,7 +13,7 @@ export default class NavFooter extends Component {
   }
 
   static defaultProps = {
-    prefixName: 'cat',
+    prefixName: 'rs',
     number: 0,
     pages: {}
   }

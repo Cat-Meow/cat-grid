@@ -9,7 +9,7 @@ class GridBody extends Component {
     renderKey: React.PropTypes.string,
     selected: React.PropTypes.oneOfType([
         React.PropTypes.array,
-        React.PropTypes.object
+        React.PropTypes.bool
     ]),
     onSelect: React.PropTypes.func
   }
@@ -17,7 +17,7 @@ class GridBody extends Component {
   static defaultProps = {
     dataList: [],
     columns: [],
-    rows: [],
+    rows: {},
     renderKey: 'id',
     selected: false
   }
