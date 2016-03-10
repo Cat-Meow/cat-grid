@@ -1,4 +1,4 @@
-# Cat-Grid
+# React Salt - Grid
 
 ## 功能
 

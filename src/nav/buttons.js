@@ -8,7 +8,7 @@ export default class Buttons extends Component {
   }
 
   static defaultProps = {
-    prefixName: 'rs',
+    prefixName: 'salt',
     batch: [],
     selected: []
   }

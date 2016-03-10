@@ -13,7 +13,7 @@ export default class NavFooter extends Component {
   }
 
   static defaultProps = {
-    prefixName: 'rs',
+    prefixName: 'salt',
     number: 0,
     pages: {}
   }

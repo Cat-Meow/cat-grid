@@ -41,7 +41,7 @@ export default class Grid extends Component {
     myHeadStyle: 'active',    // active, success, info, warning, danger
     className: 'table-responsive',
     divStyle: {},
-    prefixName: 'rs'
+    prefixName: 'salt'
   }
 
   _createState(props) {
